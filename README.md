@@ -5,8 +5,8 @@ A full-stack WhatsApp Web clone built with Next.js, MongoDB, and TypeScript. Thi
 
 ## Demo User Credential
 
--business@whatsapp.com 
--business123
+- **Email**: business@whatsapp.com 
+- **Password**: business123
 
 
 ## 🚀 Features
