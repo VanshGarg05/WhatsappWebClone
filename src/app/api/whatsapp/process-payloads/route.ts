@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       processed: 0,
       messages_inserted: 0,
       statuses_updated: 0,
-      errors: []
+      errors: [] as string[]
     };
     
     console.log(`Found ${jsonFiles.length} payload files to process`);
@@ -62,7 +62,8 @@ export async function POST(request: NextRequest) {
         
       } catch (error) {
         console.error(`Error processing ${file}:`, error);
-        results.errors.push(`${file}: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        results.errors.push(`${file}: ${errorMessage}`);
       }
     }
     
@@ -74,32 +75,33 @@ export async function POST(request: NextRequest) {
     
   } catch (error) {
     console.error('Process payloads error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: errorMessage },
       { status: 500 }
     );
   }
 }
 
-async function processMessage(message: any, value: any, payload: any, filename: string) {
+async function processMessage(message: any, value: any, payload: any, _filename: string) {
   const contact = value.contacts?.[0];
-  const metadata = value.metadata;
+  const _metadata = value.metadata;
   
   // Create processed message document
   const processedMessage = {
     id: message.id,
     meta_msg_id: message.id, // Use message ID as meta_msg_id for messages
     from: message.from,
-    to: metadata?.display_phone_number || '',
+    to: _metadata?.display_phone_number || '',
     contact_name: contact?.profile?.name || 'Unknown',
     contact_wa_id: contact?.wa_id || message.from,
     message_type: message.type || 'text',
     message_body: message.text?.body || message.body || '',
     status: 'sent', // Default status for incoming messages
     message_timestamp: new Date(parseInt(message.timestamp) * 1000),
-    phone_number_id: metadata?.phone_number_id || '',
-    display_phone_number: metadata?.display_phone_number || '',
-    payload_id: payload._id || filename,
+    phone_number_id: _metadata?.phone_number_id || '',
+    display_phone_number: _metadata?.display_phone_number || '',
+    payload_id: payload._id || _filename,
     raw_payload: payload
   };
   
@@ -113,11 +115,11 @@ async function processMessage(message: any, value: any, payload: any, filename: 
   console.log(`✓ Inserted message: ${message.id}`);
 }
 
-async function processStatus(status: any, value: any, payload: any, filename: string) {
-  const metadata = value.metadata;
+async function processStatus(status: any, value: any, _payload: any, _filename: string) {
+  const _metadata = value.metadata;
   
   // Find the message by ID or meta_msg_id and update its status
-  const updateData = {
+  const updateData: any = {
     status: status.status,
     status_timestamp: new Date(parseInt(status.timestamp) * 1000),
   };
@@ -167,7 +169,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(url.searchParams.get('page') || '1');
     const status = url.searchParams.get('status');
     
-    let query = {};
+    const query: any = {};
     if (status) {
       query.status = status;
     }
@@ -193,8 +195,9 @@ export async function GET(request: NextRequest) {
     
   } catch (error) {
     console.error('Get processed messages error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: errorMessage },
       { status: 500 }
     );
   }
