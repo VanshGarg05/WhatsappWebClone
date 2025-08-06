@@ -2,6 +2,13 @@
 
 A full-stack WhatsApp Web clone built with Next.js, MongoDB, and TypeScript. This application processes WhatsApp Business API webhook payloads and displays them in a WhatsApp-like interface.
 
+
+## Demo User Credential
+
+-business@whatsapp.com 
+-business123
+
+
 ## 🚀 Features
 
 - **Webhook Processing**: Process WhatsApp Business API webhook payloads
